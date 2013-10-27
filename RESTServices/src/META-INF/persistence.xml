@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+	<persistence-unit name="default">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<class>com.alesaudate.soasymposium.rest.entities.Contact</class>
+		<class>com.alesaudate.soasymposium.rest.entities.flight.Booking</class>
+		<class>com.alesaudate.soasymposium.rest.entities.flight.Flight</class>
+		<class>com.alesaudate.soasymposium.rest.entities.hotel.Booking</class>
+		<class>com.alesaudate.soasymposium.rest.entities.hotel.Hotel</class>
+        <properties>
+            <property name="hibernate.dialect" value=" org.hibernate.dialect.Oracle10gDialect" />
+            <property name="hibernate.connection.url" value="jdbc:oracle:thin:@localhost:1521:XE" />
+            <property name="hibernate.connection.driver_class" value="oracle.jdbc.OracleDriver" />
+            <property name="hibernate.connection.username" value="demo" />
+            <property name="hibernate.connection.password" value="demo" />
+            <property name="hibernate.hbm2ddl.auto" value="update" />
+        </properties>
+	</persistence-unit>
+</persistence>

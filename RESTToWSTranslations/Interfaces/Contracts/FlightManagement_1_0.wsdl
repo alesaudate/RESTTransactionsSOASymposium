@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:tns="http://services.alesaudate.com/flight" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="FlightManagementService"
+	targetNamespace="http://services.alesaudate.com/flight">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://services.alesaudate.com/flight">
+      <xsd:include schemaLocation="../Schemas/Flight_1_0.xsd" />
+      <xsd:element name="listFlights">
+        <xsd:complexType>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="listFlightsResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element ref="tns:flights" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="addFlight">
+      	<xsd:complexType>
+      		<xsd:sequence>
+      			<xsd:element ref="tns:flight" />
+      		</xsd:sequence>
+      	</xsd:complexType>
+      </xsd:element>
+      <xsd:element name="addFlightResponse">
+      	<xsd:complexType>
+      		<xsd:sequence>
+      			<xsd:element ref="tns:flight" />
+      		</xsd:sequence>
+      	</xsd:complexType>
+      </xsd:element>
+      
+      <xsd:element name="bookFlight">
+      	<xsd:complexType>
+      		<xsd:sequence>
+      			<xsd:element ref="tns:booking" />
+      		</xsd:sequence>
+      	</xsd:complexType>
+      </xsd:element>
+      
+       <xsd:element name="bookFlightResponse">
+      	<xsd:complexType>
+      		<xsd:sequence>
+      			<xsd:element ref="tns:booking" />
+      		</xsd:sequence>
+      	</xsd:complexType>
+      </xsd:element>
+      
+       <xsd:element name="confirmBooking">
+      	<xsd:complexType>
+      		<xsd:sequence>
+      			<xsd:element ref="tns:booking" />
+      		</xsd:sequence>
+      	</xsd:complexType>
+      </xsd:element>
+      
+       <xsd:element name="confirmBookingResponse">
+      	<xsd:complexType />
+      </xsd:element>
+      
+       <xsd:element name="discardBooking">
+      	<xsd:complexType>
+      		<xsd:sequence>
+      			<xsd:element ref="tns:booking" />
+      		</xsd:sequence>
+      	</xsd:complexType>
+      </xsd:element>
+      
+       <xsd:element name="discardBookingResponse">
+      	<xsd:complexType/>
+      </xsd:element>
+      
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="listFlightsRequest">
+    <wsdl:part element="tns:listFlights" name="body"/>
+  </wsdl:message>
+  <wsdl:message name="listFlightsResponse">
+    <wsdl:part element="tns:listFlightsResponse" name="body"/>
+  </wsdl:message>
+  <wsdl:message name="addFlightRequest">
+  	<wsdl:part element="tns:addFlight" name="body" />
+  </wsdl:message>
+  <wsdl:message name="addFlightResponse">
+  	<wsdl:part element="tns:addFlightResponse" name="body" />
+  </wsdl:message>
+  <wsdl:message name="bookFlightRequest">
+  	<wsdl:part element="tns:bookFlight" name="body" />
+  </wsdl:message>
+   <wsdl:message name="bookFlightResponse">
+  	<wsdl:part element="tns:bookFlightResponse" name="body" />
+  </wsdl:message>
+  <wsdl:message name="confirmBookingRequest">
+  	<wsdl:part element="tns:confirmBooking" name="body" />
+  </wsdl:message>
+   <wsdl:message name="confirmBookingResponse">
+  	<wsdl:part element="tns:confirmBookingResponse" name="body" />
+  </wsdl:message>
+  <wsdl:message name="discardBookingRequest">
+  	<wsdl:part element="tns:discardBooking" name="body" />
+  </wsdl:message>
+   <wsdl:message name="discardBookingResponse">
+  	<wsdl:part element="tns:discardBookingResponse" name="body" />
+  </wsdl:message>
+  
+  
+  <wsdl:portType name="FlightManagement_1_0">
+    <wsdl:operation name="listFlights">
+      <wsdl:input message="tns:listFlightsRequest"/>
+      <wsdl:output message="tns:listFlightsResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="addFlight">
+      <wsdl:input message="tns:addFlightRequest"/>
+      <wsdl:output message="tns:addFlightResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="bookFlight">
+      <wsdl:input message="tns:bookFlightRequest"/>
+      <wsdl:output message="tns:bookFlightResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="confirmBooking">
+      <wsdl:input message="tns:confirmBookingRequest"/>
+      <wsdl:output message="tns:confirmBookingResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="discardBooking">
+      <wsdl:input message="tns:discardBookingRequest"/>
+      <wsdl:output message="tns:discardBookingResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="FlightManagement_1_0SOAP" type="tns:FlightManagement_1_0">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="listFlights">
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addFlight">
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="bookFlight">
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="confirmBooking">
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="discardBooking">
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="FlightManagement_1_0">
+    <wsdl:port binding="tns:FlightManagement_1_0SOAP" name="FlightManagement_1_0SOAP">
+      <soap:address location="http://www.example.org/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

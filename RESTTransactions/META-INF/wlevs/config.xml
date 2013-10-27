@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<n1:config xmlns:n1="http://www.bea.com/ns/wlevs/config/application">
+	
+	
+	<channel>
+		<name>BookingEventChannel</name>	
+	</channel>
+	
+	<channel>
+		<name>ConfirmationEventChannel</name>	
+	</channel>
+	
+	<channel>
+		<name>BookingOutputChannel</name>	
+	</channel>
+	
+	<processor>
+		<name>BookingEventProcessor</name>
+		<rules>
+		<query id="MatchTransactionPattern">
+			<![CDATA[
+					SELECT T.* FROM BookingEventChannel, ConfirmationEventChannel
+						MATCH_RECOGNIZE (
+							MEASURES 
+								bookingIdentifier as bookingIdentifier,
+								confirmationIdentifier as confirmationIdentifier
+							INCLUDE TIMER EVENTS
+							PATTERN (A B+) DURATION 1 MINUTE
+							DEFINE
+								B AS A.identifier = B.bookingIdentifier						
+						) AS T
+					
+			
+			]]>
+			
+		</query>
+		
+		</rules>
+	
+	</processor>
+	
+</n1:config>

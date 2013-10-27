@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://services.alesaudate.com/flight"
+	xmlns:tns="http://services.alesaudate.com/flight" xmlns:common="http://services.alesaudate.com/common" 
+	elementFormDefault="qualified"
+	version="1.0">
+
+
+	<import namespace="http://services.alesaudate.com/common"
+		schemaLocation="Common_1_0.xsd" />
+
+
+	<element name="flights">
+		<complexType>
+			<sequence>
+				<element ref="tns:flight" minOccurs="0" maxOccurs="unbounded" />
+			</sequence>
+		</complexType>
+	</element>
+
+
+	<element name="flight" type="tns:Flight" />
+
+	<element name="booking" type="tns:Booking" />
+
+	<complexType name="Flight">
+		<sequence>
+			<element name="identifier" type="string" minOccurs="0" />
+			<element name="flightDate" type="dateTime" minOccurs="0" />
+			<element name="fromDestination" type="string" minOccurs="0" />
+			<element name="toDestination" type="string" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="Booking">
+		<sequence>
+			<element name="identifier" type="string" minOccurs="0" />
+			<element ref="tns:flight" minOccurs="0" />
+			<element ref="common:contact" minOccurs="0" />
+			<element name="expires" type="dateTime" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+</schema>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:wlevs="http://www.bea.com/ns/wlevs/spring" xmlns:jdbc="http://www.oracle.com/ns/ocep/jdbc"
+	xmlns:spatial="http://www.oracle.com/ns/ocep/spatial"
+	xsi:schemaLocation="
+  http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://www.bea.com/ns/wlevs/spring
+  http://www.bea.com/ns/wlevs/spring/spring-wlevs-v11_1_1_7.xsd
+  http://www.oracle.com/ns/ocep/jdbc
+  http://www.oracle.com/ns/ocep/jdbc/ocep-jdbc.xsd
+  http://www.oracle.com/ns/ocep/spatial
+  http://www.oracle.com/ns/ocep/spatial/ocep-spatial.xsd">
+
+	<wlevs:event-type-repository>
+		<wlevs:event-type type-name="TicketingEvent">
+			<wlevs:class>com.alesaudate.rest.event.Ticketing</wlevs:class>
+		</wlevs:event-type>
+	</wlevs:event-type-repository>
+
+
+	<!-- Printers -->
+
+	<bean id="outputConfirmedBean" class="com.alesaudate.rest.event.TriggerConfirmedReservation" />
+	
+	<bean id="outputUnconfirmedBean" class="com.alesaudate.rest.event.TriggerUnconfirmedBooking" />
+	
+	<bean id="aboutToExpireBean" class="com.alesaudate.rest.event.TriggerAboutToExpireEmail" />
+	
+	<!-- Converters -->
+	
+	<bean id="JmsInboundConverter" class="com.alesaudate.rest.adapters.JmsInboundConverter" />
+	
+	<!-- Adapters -->
+
+	<wlevs:adapter id="TicketingJMSInputAdapter" provider="jms-inbound">
+		<wlevs:instance-property name="converterBean" ref="JmsInboundConverter" />
+		<wlevs:listener ref="TicketingInputChannel" />
+	</wlevs:adapter>
+	
+	
+	<!-- Processors -->
+
+	<wlevs:processor id="TicketingEventProcessor">
+		<wlevs:listener ref="MatchTickets" />
+	</wlevs:processor>
+
+	<wlevs:processor id="AboutToExpireProcessor">
+		<wlevs:listener ref="AboutToExpireChannel" />
+
+	</wlevs:processor>
+	
+	<wlevs:processor id="ConfirmedReservationsProcessor">
+		<wlevs:listener ref="TicketingConfirmedOutputChannel" />
+	</wlevs:processor>
+
+	<wlevs:processor id="UnconfirmedReservationsProcessor">
+		<wlevs:listener ref="TicketingNotConfirmedOutputChannel" />
+	</wlevs:processor>
+	
+	<wlevs:processor id="FilterOutAboutToExpireReservationsProcessor">
+		<wlevs:listener ref="ExpiringOutputChannel" />
+	</wlevs:processor>
+
+	<!-- Input Channels -->
+
+	<wlevs:channel id="TicketingInputChannel" event-type="TicketingEvent">
+		<wlevs:listener ref="TicketingEventProcessor" />
+		<wlevs:listener ref="AboutToExpireProcessor" />
+	</wlevs:channel>
+	
+	<!-- Intermediate Channels -->
+
+	<wlevs:channel id="MatchTickets" event-type="TicketingEvent">
+		<wlevs:listener ref="ConfirmedReservationsProcessor" />
+		<wlevs:listener ref="UnconfirmedReservationsProcessor" />
+	</wlevs:channel>
+
+
+	<wlevs:channel id="AboutToExpireChannel" event-type="TicketingEvent">
+		<wlevs:listener ref="FilterOutAboutToExpireReservationsProcessor" />
+	</wlevs:channel>
+	
+	<!-- Output Channels -->
+
+
+	<wlevs:channel id="TicketingConfirmedOutputChannel"
+		event-type="TicketingEvent">
+		<wlevs:listener ref="outputConfirmedBean" />
+	</wlevs:channel>
+
+	<wlevs:channel id="TicketingNotConfirmedOutputChannel"
+		event-type="TicketingEvent">
+		<wlevs:listener ref="outputUnconfirmedBean" />
+	</wlevs:channel>
+
+	<wlevs:channel id="ExpiringOutputChannel" event-type="TicketingEvent">
+		<wlevs:listener ref="aboutToExpireBean" />
+	</wlevs:channel>
+</beans>
+

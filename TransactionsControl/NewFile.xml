@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ctx:endpoint
+	name="ProxyService$RESTToWSTranslations$Services$ProxyServices$FlightServicePS"
+	xmlns:ctx="http://www.bea.com/wli/sb/context">
+	<ctx:service>
+		<ctx:operation>bookFlight</ctx:operation>
+	</ctx:service>
+	<ctx:transport>
+		<ctx:mode>request-response</ctx:mode>
+		<ctx:qualityOfService>best-effort</ctx:qualityOfService>
+		<ctx:request xsi:type="http:HttpRequestMetaData"
+			xmlns:http="http://www.bea.com/wli/sb/transports/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+			<tp:headers xsi:type="http:HttpRequestHeaders"
+				xmlns:tp="http://www.bea.com/wli/sb/transports">
+				<http:Content-Type>text/xml; charset=utf-8</http:Content-Type>
+				<http:SOAPAction>""</http:SOAPAction>
+			</tp:headers>
+			<tp:encoding xmlns:tp="http://www.bea.com/wli/sb/transports">utf-8</tp:encoding>
+			<http:query-parameters />
+		</ctx:request>
+		<ctx:response xsi:type="http:HttpResponseMetaData"
+			xmlns:http="http://www.bea.com/wli/sb/transports/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+			<tp:headers xsi:type="http:HttpResponseHeaders"
+				xmlns:tp="http://www.bea.com/wli/sb/transports">
+				<http:Content-Type>text/xml</http:Content-Type>
+			</tp:headers>
+			<tp:response-code xmlns:tp="http://www.bea.com/wli/sb/transports">0</tp:response-code>
+		</ctx:response>
+	</ctx:transport>
+	<ctx:security>
+		<ctx:transportClient>
+			<ctx:username>weblogic</ctx:username>
+			<ctx:principals>
+				<ctx:group>AdminChannelUsers</ctx:group>
+				<ctx:group>Administrators</ctx:group>
+				<ctx:group>IntegrationAdministrators</ctx:group>
+			</ctx:principals>
+		</ctx:transportClient>
+	</ctx:security>
+</ctx:endpoint>

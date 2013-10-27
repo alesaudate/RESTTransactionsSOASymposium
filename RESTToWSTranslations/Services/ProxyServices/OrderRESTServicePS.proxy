@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml-fragment xmlns:ser="http://www.bea.com/wli/sb/services" xmlns:tran="http://www.bea.com/wli/sb/transports" xmlns:env="http://www.bea.com/wli/config/env" xmlns:http="http://www.bea.com/wli/sb/transports/http" xmlns:con="http://www.bea.com/wli/sb/pipeline/config" xmlns:con1="http://www.bea.com/wli/sb/stages/config" xmlns:con2="http://www.bea.com/wli/sb/stages/routing/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con3="http://www.bea.com/wli/sb/stages/logging/config">
+  <ser:coreEntry isProxy="true" isEnabled="true">
+    <ser:binding type="abstract XML"/>
+    <ser:monitoring isEnabled="false">
+      <ser:aggregationInterval>10</ser:aggregationInterval>
+      <ser:pipelineMonitoringLevel>Pipeline</ser:pipelineMonitoringLevel>
+    </ser:monitoring>
+    <ser:reporting>true</ser:reporting>
+    <ser:logging isEnabled="true">
+      <ser:logLevel>debug</ser:logLevel>
+    </ser:logging>
+    <ser:sla-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:sla-alerting>
+    <ser:pipeline-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:pipeline-alerting>
+  </ser:coreEntry>
+  <ser:endpointConfig>
+    <tran:provider-id>http</tran:provider-id>
+    <tran:inbound>true</tran:inbound>
+    <tran:URI>
+      <env:value>/rest/order</env:value>
+    </tran:URI>
+    <tran:inbound-properties/>
+    <tran:all-headers>true</tran:all-headers>
+    <tran:provider-specific>
+      <http:inbound-properties/>
+    </tran:provider-specific>
+  </ser:endpointConfig>
+  <ser:router>
+    <con:flow>
+      <con:branch-node type="condition" name="BranchNode1">
+        <con:context/>
+        <con:branch-table variable="inbound">
+          <con:xpath>
+            <con1:xpathText>./ctx:transport/ctx:request/http:http-method</con1:xpathText>
+          </con:xpath>
+          <con:branch name="POST">
+            <con:operator>equals</con:operator>
+            <con:value>'POST'</con:value>
+            <con:flow>
+              <con:route-node name="RouteNode1">
+                <con:context/>
+                <con:actions>
+                  <con2:route>
+                    <con1:id>_ActionId-3904516217644440535-526e8fb8.141d76ea2d8.-7f26</con1:id>
+                    <con2:service ref="RESTToWSTranslations/Services/BusinessServices/OrderServiceBusiness" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con2:operation>placeOrders</con2:operation>
+                    <con2:outboundTransform>
+                      <con3:log>
+                        <con1:id>_ActionId-3904516217644440535-526e8fb8.141d76ea2d8.-7eee</con1:id>
+                        <con3:logLevel>warning</con3:logLevel>
+                        <con3:expr>
+                          <con1:xqueryText>$body</con1:xqueryText>
+                        </con3:expr>
+                      </con3:log>
+                    </con2:outboundTransform>
+                    <con2:responseTransform/>
+                  </con2:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:default-branch>
+            <con:flow/>
+          </con:default-branch>
+        </con:branch-table>
+      </con:branch-node>
+    </con:flow>
+  </ser:router>
+</xml-fragment>

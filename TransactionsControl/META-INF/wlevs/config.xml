@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wlevs:config xmlns:wlevs="http://www.bea.com/ns/wlevs/config/application"
+              xmlns:jdbc="http://www.oracle.com/ns/ocep/config/jdbc">
+    
+    
+    
+    <jms-adapter>
+    	<name>TicketingJMSInputAdapter</name>
+    	<jndi-provider-url>t3://localhost:7001</jndi-provider-url>
+    	<connection-jndi-name>TicketingCF</connection-jndi-name>
+    	<destination-jndi-name>TicketingQueue</destination-jndi-name>
+    	<user>weblogic</user>
+    	<password>weblogic1</password>
+    	<work-manager>JettyWorkManager</work-manager>
+    </jms-adapter>
+    
+    
+    <channel>
+		<name>TicketingInputChannel</name>	
+	</channel>
+	
+	
+	<processor>
+		<name>TicketingEventProcessor</name>
+		<rules>
+		
+		
+		
+		<query id="MatchTransactionPattern">
+			<![CDATA[
+					SELECT 
+						T.*					
+					FROM 
+						TicketingInputChannel
+					
+					MATCH_RECOGNIZE (
+							PARTITION BY identifier
+							MEASURES 
+								ticketingType as ticketingType,
+								identifier as identifier
+														
+							PATTERN (A B?) WITHIN 30 SECONDS
+							DEFINE
+								A AS ticketingType = "RESERVATION",
+								B as ticketingType = "CONFIRMATION" and identifier = A.identifier
+														
+						) AS T
+					
+			
+			]]>
+			
+		</query>
+		</rules>
+	
+	</processor>
+	
+	<processor>
+		<name>AboutToExpireProcessor</name>
+		<rules>
+		
+		
+		
+		<query id="MatchTransactionPattern">
+			<![CDATA[
+					SELECT 
+						T.*					
+					FROM 
+						TicketingInputChannel
+					
+					MATCH_RECOGNIZE (
+							PARTITION BY identifier
+							MEASURES 
+								ticketingType as ticketingType,
+								identifier as identifier
+							
+							PATTERN (A B?) WITHIN  15 SECONDS
+							DEFINE
+								A AS ticketingType = "RESERVATION",
+								B as ticketingType = "CONFIRMATION" and identifier = A.identifier
+														
+						) AS T
+					
+			
+			]]>
+			
+		</query>
+		</rules>
+	
+	</processor>
+	
+	<processor>
+		<name>ConfirmedReservationsProcessor</name>
+		
+		<rules>
+			<query id="MatchConfirmedTransactions">
+				<![CDATA[
+					SELECT * FROM MatchTickets WHERE ticketingType = "CONFIRMATION"
+				
+				]]>
+				
+			
+			</query>
+		</rules>
+	</processor>
+	
+	<processor>
+		<name>UnconfirmedReservationsProcessor</name>
+		
+		<rules>
+			<query id="MatchUnconfirmedTransactions">
+				<![CDATA[
+					SELECT * FROM MatchTickets WHERE ticketingType = "RESERVATION"
+				]]>
+			
+			</query>
+		</rules>
+	</processor>
+	
+	<processor>
+		<name>FilterOutAboutToExpireReservationsProcessor</name>
+		
+		<rules>
+			<query id="MatchUnconfirmedTransactions">
+				<![CDATA[
+					SELECT * FROM AboutToExpireChannel  WHERE ticketingType = "RESERVATION"
+				]]>
+			
+			</query>
+		</rules>
+	</processor>
+    
+</wlevs:config>
+

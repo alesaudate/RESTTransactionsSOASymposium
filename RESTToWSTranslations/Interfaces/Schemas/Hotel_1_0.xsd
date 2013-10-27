@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://services.alesaudate.com/hotel"
+	xmlns:tns="http://services.alesaudate.com/hotel" 
+	xmlns:common="http://services.alesaudate.com/common"	
+	elementFormDefault="qualified" version="1.0">
+	
+	<import namespace="http://services.alesaudate.com/common"  schemaLocation="Common_1_0.xsd" />
+	
+	
+	<element name="hotels">
+		<complexType>
+			<sequence>
+				<element ref="tns:hotel" minOccurs="0" maxOccurs="unbounded" />
+			</sequence>
+		</complexType>
+	</element>
+	
+	<element name="hotel" type="tns:Hotel" />
+	<element name="booking" type="tns:Booking" />
+	
+	<complexType name="Hotel">
+		<sequence>
+			<element name="identifier" type="string" minOccurs="0" />
+			<element name="name" type="string" minOccurs="0" />
+			<element name="address" type="string" minOccurs="0" />
+		</sequence> 
+	</complexType>
+	
+	<complexType name="Booking">
+		<sequence>
+			<element ref="tns:hotel" minOccurs="0"/>
+			<element ref="common:contact" minOccurs="0" />
+			<element name="identifier" type="string" minOccurs="0" />
+			<element name="periodFrom" type="dateTime" minOccurs="0" />
+			<element name="periodTo" type="dateTime" minOccurs="0" />
+			<element name="numberOfPeople" type="int" minOccurs="0" />
+			<element name="expires" type="dateTime" minOccurs="0" />
+		</sequence>
+	</complexType>
+	
+</schema>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://services.alesaudate.com/car"
+	xmlns:tns="http://services.alesaudate.com/car" xmlns:common="http://services.alesaudate.com/common" 
+	version="1.0"
+	elementFormDefault="qualified">
+	
+	<import namespace="http://services.alesaudate.com/common" schemaLocation="Common_1_0.xsd" />
+	
+	
+	<element name="cars">
+		<complexType>
+			<sequence>
+				<element ref="tns:car" minOccurs="0" maxOccurs="unbounded" />
+			</sequence>
+		</complexType>
+	</element>
+	
+	<element name="car" type="tns:Car" />
+	<element name="carRental" type="tns:CarRental" />
+	
+	
+	<complexType name="Car">
+		<sequence>
+			<element name="identifier" type="string" minOccurs="0" />
+			<element name="model" type="string" minOccurs="0" />
+			<element name="year" type="integer" minOccurs="0" />
+		</sequence>
+	</complexType>
+	
+	<complexType name="CarRental">
+		<sequence>
+			<element name="identifier" type="string" minOccurs="0" />
+			<element name="car" type="tns:Car" minOccurs="0" />
+			<element name="periodFrom" type="dateTime" minOccurs="0" />
+			<element name="periodTo" type="dateTime" minOccurs="0" />
+			<element ref="common:contact" minOccurs="0" />
+			<element name="expires" type="dateTime" minOccurs="0" />
+		</sequence>
+	</complexType>
+	
+	
+	
+</schema>

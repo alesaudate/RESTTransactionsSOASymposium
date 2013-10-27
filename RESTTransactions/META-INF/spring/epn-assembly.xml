@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi" xmlns:wlevs="http://www.bea.com/ns/wlevs/spring" xmlns:cqlx="http://www.oracle.com/schema/cqlx" xsi:schemaLocation="  http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans.xsd  http://www.springframework.org/schema/osgi  http://www.springframework.org/schema/osgi/spring-osgi.xsd  http://www.bea.com/ns/wlevs/spring  http://www.bea.com/ns/wlevs/spring/spring-wlevs-v11_1_1_7.xsd">
+
+    <wlevs:event-type-repository>
+        <wlevs:event-type type-name="BookingEvent">
+            <wlevs:class>com.alesaudate.resttransactions.events.Booking</wlevs:class>
+        </wlevs:event-type>
+        <wlevs:event-type type-name="ConfirmationEvent">
+        	<wlevs:class>com.alesaudate.resttransactions.events.Confirmation</wlevs:class>
+        </wlevs:event-type>
+    </wlevs:event-type-repository>
+
+    <wlevs:adapter id="bookingInbound" class="com.alesaudate.resttransactions.adapters.BookingAdapterServlet" />
+    
+    
+    <bean id="console" class="com.alesaudate.resttransactions.adapters.ConsolePrinter" />
+        
+   
+	<wlevs:channel id="BookingEventChannel" event-type="BookingEvent">
+		<wlevs:listener ref="BookingEventProcessor" />
+	
+	</wlevs:channel>
+	
+	<wlevs:channel id="ConfirmationEventChannel" event-type="ConfirmationEvent">
+		<wlevs:listener ref="BookingEventProcessor" />
+	
+	</wlevs:channel>
+	
+	<wlevs:processor id="BookingEventProcessor">
+		<wlevs:listener ref="BookingOutputChannel" />
+	</wlevs:processor>
+	
+	<wlevs:channel id="BookingOutputChannel" event-type="BookingEvent">
+		<wlevs:listener ref="console" />
+	</wlevs:channel>
+    
+        
+</beans>

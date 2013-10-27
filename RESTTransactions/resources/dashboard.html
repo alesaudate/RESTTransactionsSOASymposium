@@ -1,0 +1,657 @@
+<html>
+<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8" -->
+<head>
+  <title>WLEvS Signal Generation Demo</title>
+  <script>
+// Firefox 3 doesn't work, so do a browser check and warn the user if their browser is unsupported.
+var BrowserDetect = {
+	init: function () {
+		this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+		this.version = this.searchVersion(navigator.userAgent)
+			|| this.searchVersion(navigator.appVersion)
+			|| "an unknown version";
+		this.OS = this.searchString(this.dataOS) || "an unknown OS";
+	},
+	searchString: function (data) {
+		for (var i=0;i<data.length;i++)	{
+			var dataString = data[i].string;
+			var dataProp = data[i].prop;
+			this.versionSearchString = data[i].versionSearch || data[i].identity;
+			if (dataString) {
+				if (dataString.indexOf(data[i].subString) != -1)
+					return data[i].identity;
+			}
+			else if (dataProp)
+				return data[i].identity;
+		}
+	},
+	searchVersion: function (dataString) {
+		var index = dataString.indexOf(this.versionSearchString);
+		if (index == -1) return;
+		return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+	},
+	dataBrowser: [
+		{ 	string: navigator.userAgent,
+			subString: "OmniWeb",
+			versionSearch: "OmniWeb/",
+			identity: "OmniWeb"
+		},
+		{
+			string: navigator.vendor,
+			subString: "Apple",
+			identity: "Safari"
+		},
+		{
+			prop: window.opera,
+			identity: "Opera"
+		},
+		{
+			string: navigator.vendor,
+			subString: "iCab",
+			identity: "iCab"
+		},
+		{
+			string: navigator.vendor,
+			subString: "KDE",
+			identity: "Konqueror"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "Firefox",
+			identity: "Firefox"
+		},
+		{
+			string: navigator.vendor,
+			subString: "Camino",
+			identity: "Camino"
+		},
+		{		// for newer Netscapes (6+)
+			string: navigator.userAgent,
+			subString: "Netscape",
+			identity: "Netscape"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "MSIE",
+			identity: "Explorer",
+			versionSearch: "MSIE"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "Gecko",
+			identity: "Mozilla",
+			versionSearch: "rv"
+		},
+		{ 		// for older Netscapes (4-)
+			string: navigator.userAgent,
+			subString: "Mozilla",
+			identity: "Netscape",
+			versionSearch: "Mozilla"
+		}
+	],
+	dataOS : [
+		{
+			string: navigator.platform,
+			subString: "Win",
+			identity: "Windows"
+		},
+		{
+			string: navigator.platform,
+			subString: "Mac",
+			identity: "Mac"
+		},
+		{
+			string: navigator.platform,
+			subString: "Linux",
+			identity: "Linux"
+		}
+	]
+
+};
+BrowserDetect.init();
+if(!((BrowserDetect.browser == "Firefox" && BrowserDetect.version == 2) ||
+   BrowserDetect.browser == "Explorer")) {
+    alert(BrowserDetect.browser + " " + BrowserDetect.version + " is unsupported for signalgen demo."
+          +"\nUse Firefox 2 or Internet Explorer instead.");
+}
+		</script>
+		<script>
+		    var MAX_ROWS = 10;
+
+		    var LATENCY_THRESHOLD = 200;
+		    var LATENCY_MAX = 400;
+		    var LATENCY_LIMIT = 400;
+		    var Y_SCALE_FACTOR = 500;  // To get charted numbers between 0-100 pixels
+		    var TIMESTAMP_PROPERTY = "Timestamp";
+		    var TOTAL_LATENCY_PROPERTY = "TotalLatency";
+		    var SERVER_LATENCY_PROPERTY = "ServerLatency";
+
+		    var UPDATE_TABLE_FREQ = 1000;
+		    var UPDATE_GRAPH_FREQ = 1000;
+		    var UPDATE_HISTOGRAM_FREQ = 10000;
+		    var EVENT_DATA_URL_PCT = "/signalgeneration?pct";
+   		    var EVENT_DATA_URL_TREND = "/signalgeneration?trend";
+		    var HISTOGRAM_DATA_URL = "/signalgeneration?histogram";
+		    var LATENCY_DATA_URL = "/signalgeneration?lat";
+
+			djConfig={
+				isDebug:true
+			}
+		</script>
+		<script type="text/javascript" src="dojo/dojo.js">
+		</script>
+		<script>
+			dojo.require("dojo.collections.Store");
+			dojo.require("dojo.charting.Chart");
+			dojo.require('dojo.json');
+			dojo.require('dojo.io');
+
+			//	our sample data for our line chart.
+			var json = [{ Timestamp: -10, ServerLatency:0 }];
+			var store = new dojo.collections.Store();
+			store.setData(json);
+
+			var s1 = new dojo.charting.Series({
+				dataSource:store,
+				bindings:{ x:TIMESTAMP_PROPERTY, y:SERVER_LATENCY_PROPERTY },
+				label:"Series 1"
+			});			
+
+			//	keep going.
+			var xA = new dojo.charting.Axis();
+			xA.range={upper:120, lower:0};
+			xA.origin="max";
+			xA.showTicks = true;
+			xA.label = "Time";
+
+			var yA = CreateYAxis();
+
+			var pA = new dojo.charting.Plot(xA, yA);
+			pA.renderType = dojo.charting.RenderPlotSeries.Grouped;
+			pA.addSeries({ data:s1, plotter: dojo.charting.Plotters.StackedCurvedArea });
+
+			var pa = new dojo.charting.PlotArea();
+			pa.size={width:600,height:250};
+			pa.padding={top:20, right:20, bottom:30, left:50 };
+			pa.plots.push(pA);
+
+			s1.color = pa.nextColor();
+
+			var chart = new dojo.charting.Chart("Average Latency", "average latency chart", "average latency");
+			chart.addPlotArea({ x:20,y:20, plotArea:pa });
+
+			dojo.addOnLoad(function(){
+				chart.node = dojo.byId("chartTest1");
+				chart.render();
+			});
+
+
+			var barStore = new dojo.collections.Store();
+			barStore.setData([
+				{ value:0 }
+			]);
+			var barSeries = new dojo.charting.Series({ dataSource:barStore, bindings:{ y:"value"} });
+
+			var barPercentages = [0, 20, 40, 60, 80, 100];
+			var barYUpper = 12000;
+			var barY = new dojo.charting.Axis();
+			barY.range={upper:barYUpper, lower:0};
+			barY.origin="min";
+			barY.showTicks = true;
+			barY.showLines = true;
+			barY.label = "% of Events";
+			var barYLabels = [];
+			for (var i = 0; i < barPercentages.length; i++) {
+				var barPerc = barPercentages[i];
+				barYLabels[i] = { label: "" + barPerc + "%", value: barPerc * barYUpper / 100 };
+			}
+			barY.labels = barYLabels;
+
+			var barXUpper = 100;
+			var barX = new dojo.charting.Axis();
+			barX.range={upper:barXUpper,lower:0};
+			barX.origin="max";
+			barX.label = "Latency (microseconds)";
+			barX.labels = [ { label:" ", value: 0 } ]
+
+
+			var barPlot = new dojo.charting.Plot(barX, barY);
+			barPlot.renderType = dojo.charting.RenderPlotSeries.Grouped;
+			barPlot.addSeries({ data:barSeries, plotter: dojo.charting.Plotters.Bar });
+
+			var barPlotArea = new dojo.charting.PlotArea();
+			barPlotArea.plots.push(barPlot);
+			barPlotArea.size={width:600,height:250};
+			barPlotArea.padding={top:20, right:40, bottom:30, left:50 };
+
+			barSeries.color = pa.nextColor();
+
+			var barChart = new dojo.charting.Chart(null, "Test chart", "This is a potential description");
+			barChart.addPlotArea({ x:20,y:290, plotArea:barPlotArea });
+
+			dojo.addOnLoad(function(){
+				barChart.node = dojo.byId("chartTest1");
+				barChart.render();
+			});
+
+var updateLatencyGraphTime;
+var jsonIndex = 0;
+var jsonLower;
+
+function UpdateLatencyGraph(eventData) {
+
+	var rerender = true;
+
+	var json = store.getData();
+	if (jsonIndex == 0) {
+		if (!json) {
+			json = [];
+		}
+		jsonLower = eventData[0].Timestamp;
+	}
+
+	var jsonOffset = jsonIndex;
+	jsonIndex += eventData.length;
+	if (jsonIndex > json.length) {
+		for (var i = json.length; i < jsonIndex; i++) {
+			json[i] = { Timestamp: -10, ServerLatency:0 };
+		}
+		store.setData(json);
+	}
+	for (var i = 0; i < eventData.length; i++) {
+		var stockTick = eventData[i];
+		var j = jsonOffset + i;
+		json[j].Timestamp = stockTick.Timestamp - jsonLower;
+		json[j].ServerLatency = stockTick.ServerLatency / Y_SCALE_FACTOR;   // convert from nanoseconds to microseconds
+	}
+
+	if (rerender) {
+		if (jsonIndex < json.length) {
+			json.length = jsonIndex;
+		}
+		xA.range={upper:json[json.length-1].Timestamp, lower:json[0].Timestamp};
+		pa.render();
+		jsonIndex = 0;
+		updateLatencyGraphTime = currentTime;
+	}
+}
+
+function dumpData (data) {
+	var strData = "\n";
+	for (var i = 0; i < data.length; i++) {
+		strData += "{ label: " + data[i].label + ",value: " + data[i].value + "}\n";
+	}
+	return (strData);
+}
+
+var currentTime;
+var updateHistogramTime;
+
+function My_Histogram_Request() {
+	if (!updateHistogramTime || currentTime >= updateHistogramTime + UPDATE_HISTOGRAM_FREQ) {
+		updateHistogramTime = currentTime;
+		var bindArgs = {
+			url: HISTOGRAM_DATA_URL,
+			error: function(type, data, evt){
+			},
+			load: function(type, data, evt){
+			My_Histogram_Response(data);
+			},
+			mimetype: "text/javascript"
+		};
+		dojo.io.bind(bindArgs);
+	}
+}
+
+function UpdateHistogram(data) {
+	var barData = barStore.getData();
+
+	var yFudgeFactor = 50 / data.length;
+	var nBars = barData.length;
+	var reaxis = false;
+	if (data.length != barData.length) {
+		reaxis = true;
+		barX = new dojo.charting.Axis();
+		barX.range={upper:barXUpper,lower:0};
+		barX.origin="max";
+		barX.label = "Latency (microseconds)";
+		for (var i = barData.length; i < data.length; i++) {
+			barData[i] = { value:0 };
+			barX.labels[i] = { label: " ", value: 0 };
+		}
+		barData.length = data.length;
+		barStore.setData(barData);
+	}
+	var totalValue = 0;
+	var xIncrement = barXUpper / data.length;
+	for (var i = 0; i < data.length; i++) {
+		var value = data[i].value;
+		barData[i].value = value;
+		totalValue += value;
+		barX.labels[i] = { label: data[i].label, value: yFudgeFactor + xIncrement * i};
+	}
+	if (reaxis) {
+		barPlot.setAxis(barX,"x");
+	}
+
+	barY.range={upper:totalValue, lower:0};
+	for (var i = 0; i < barPercentages.length; i++) {
+		var barPerc = barPercentages[i];
+		barY.labels[i].value = barPerc * totalValue / 100;
+	}
+	barY.range={upper:totalValue, lower:0};
+
+	barChart.render();
+}
+
+function My_Histogram_Response(data){
+	UpdateHistogram (data);
+}
+
+var timerID = 0;
+
+function StartTimer() {
+   timerID = setTimeout("StartTimer()", UPDATE_TABLE_FREQ);
+   currentTime = new Date().getTime();
+   My_Request_Lat();
+   My_Request_Pct();
+   My_Request_Trend();
+   My_Histogram_Request();
+}
+
+function StopTimer() {
+    if (timerID)
+	    clearTimeout(timerID);
+}
+
+function My_Request_Lat() {
+   var bindArgs = {
+    url: LATENCY_DATA_URL,
+    error: function(type, data, evt){
+     StopTimer();
+     alert("An error occurred while retrieving latency data from the server.");
+    },
+    load: function(type, data, evt){
+    	UpdateLatencyGraph(data);
+    },
+    mimetype: "text/javascript"
+   };
+   dojo.io.bind(bindArgs);
+}
+
+function My_Request_Pct() {
+   var bindArgs = {
+    url: EVENT_DATA_URL_PCT,
+    error: function(type, data, evt){
+     StopTimer();
+     alert("An error occurred while retrieving percentage data from the server.");
+    },
+    load: function(type, data, evt){
+     My_Response_Pct(data);
+    },
+    mimetype: "text/javascript"
+   };
+   dojo.io.bind(bindArgs);
+}
+
+function My_Response_Pct(data){
+	UpdateTable(data, "PctTable", true);
+}
+
+function My_Request_Trend() {
+   var bindArgs = {
+    url: EVENT_DATA_URL_TREND,
+    error: function(type, data, evt){
+     StopTimer();
+     alert("An error occurred while retrieving trend data from the server.");
+    },
+    load: function(type, data, evt){
+     My_Response_Trend(data);
+    },
+    mimetype: "text/javascript"
+   };
+   dojo.io.bind(bindArgs);
+}
+
+function My_Response_Trend(data){
+	UpdateTable(data, "TrendTable", true);
+}
+
+function FormatPrice(price) {
+	var fPrice = "$" + price/100;
+	if (price % 100 == 0) {
+		fPrice += ".00";
+	}
+	else if (price % 10 == 0) {
+		fPrice += "0";
+	}
+	return fPrice;
+}
+
+function CreateTableHeader(thead, eventArray) {
+	if (eventArray && eventArray.length > 0) {
+		var eventObj = eventArray[0];
+		var tr = document.createElement("TR");
+		for (var eventProp in eventObj) {
+			if (eventProp == SERVER_LATENCY_PROPERTY || eventProp == TIMESTAMP_PROPERTY || eventProp == TOTAL_LATENCY_PROPERTY) {
+				continue;
+			}
+		
+			var th = document.createElement("TH");
+			th.className = eventProp + "Header";
+			th.innerHTML = eventProp;
+			tr.appendChild(th);
+		}
+		thead.appendChild(tr);
+	}
+}
+
+function UpdateTable(obj, tbl, scrl) {
+    var table = document.getElementById(tbl);
+    if (table.tHead.rows.length == 0) {
+    	CreateTableHeader (table.tHead, obj);
+    } else {
+    var tBody = table.tBodies[0];
+	while( tBody.hasChildNodes() ) { tBody.removeChild( tBody.lastChild ); }
+	for (var i = 0; i < obj.length; i++) {
+		var eventObj = obj[i];
+		var tr = document.createElement("TR");
+		for (var eventProp in eventObj) {
+			if (eventProp == SERVER_LATENCY_PROPERTY || eventProp == TIMESTAMP_PROPERTY) {					
+				continue;
+			}
+		
+			var td = document.createElement("TD");
+			var value = eventObj[eventProp];
+			td.className = eventProp + "Data";
+			td.innerHTML = value;
+			tr.appendChild(td);
+		}
+		if (scrl) {
+			tBody.insertBefore(tr,tBody.firstChild);
+		} else {
+			tBody.insertBefore(tr, null);
+		}
+	    if (tBody.childNodes.length > MAX_ROWS) {
+	    	tBody.removeChild(tBody.lastChild);
+	    }
+	}
+    }
+}
+
+function CreateYAxis() {
+	var yA = new dojo.charting.Axis();
+	yA.showLines = true;
+	yA.showTicks = true;
+	yA.labels = [ {label:"0", value:0 }, 
+	{ label:""+(LATENCY_THRESHOLD),value:LATENCY_THRESHOLD / Y_SCALE_FACTOR }, 
+	{ label:""+(LATENCY_MAX), value:LATENCY_MAX / Y_SCALE_FACTOR } ];
+	yA.label = "Average Latency (microseconds)";
+	yA.range={upper:LATENCY_LIMIT/Y_SCALE_FACTOR,lower:0};
+	return yA;
+}
+
+function UpdateLatencyThreshold(threshold,max,limit) {
+	LATENCY_THRESHOLD = limit;
+	LATENCY_MAX = limit / 2.0;
+	LATENCY_LIMIT = limit;
+	var yA = CreateYAxis();
+	pA.setAxis(yA,"y");
+	chart.render();
+}
+
+function EnterLatencyThreshold(eventObj) {
+	var e = (eventObj ? eventObj : window.event);
+	if ((e.keyCode && e.keyCode==13)|| (e.which && e.which==13))
+		UpdateLatencyThreshold(parseInt(LatencyThresholdInput.value),LATENCY_MAX,LATENCY_LIMIT);
+}
+
+function EnterLatencyMax(eventObj) {
+	var e = (eventObj ? eventObj : window.event);
+	if ((e.keyCode && e.keyCode==13)|| (e.which && e.which==13))
+		UpdateLatencyThreshold(LATENCY_THRESHOLD,parseInt(LatencyMaxInput.value),LATENCY_LIMIT);
+}
+
+function EnterLatencyLimit(eventObj) {
+	var e = (eventObj ? eventObj : window.event);
+	if ((e.keyCode && e.keyCode==13)|| (e.which && e.which==13))
+		UpdateLatencyThreshold(LATENCY_THRESHOLD,LATENCY_MAX,parseInt(LatencyLimitInput.value));
+}
+
+function UpdateTableRefreshRate(rate) {
+	UPDATE_TABLE_FREQ = parseInt(rate);
+}
+
+function UpdateGraphRefreshRate(rate) {
+	UPDATE_GRAPH_FREQ = parseInt(rate);
+}
+
+function UpdateHistogramRefreshRate(rate) {
+	UPDATE_HISTOGRAM_FREQ = parseInt(rate);
+}
+
+function EnterTableRefreshRate(eventObj) {
+	var e = (eventObj ? eventObj : window.event);
+	if ((e.keyCode && e.keyCode==13)|| (e.which && e.which==13))
+		UpdateTableRefreshRate(TableRefreshRateInput.value);
+}
+
+function EnterGraphRefreshRate(eventObj) {
+	var e = (eventObj ? eventObj : window.event);
+	if ((e.keyCode && e.keyCode==13)|| (e.which && e.which==13))
+		UpdateGraphRefreshRate(GraphRefreshRateInput.value);
+}
+
+function EnterHistogramRefreshRate(eventObj) {
+	var e = (eventObj ? eventObj : window.event);
+	if ((e.keyCode && e.keyCode==13)|| (e.which && e.which==13))
+		UpdateHistogramRefreshRate(HistogramRefreshRateInput.value);
+}
+
+var LatencyLimitInput;
+var TableRefreshRateInput;
+var GraphRefreshRateInput;
+var HistogramRefreshRateInput;
+
+function InitDashboard() {
+    LatencyLimitInput = document.getElementById("LatencyLimit");
+    LatencyLimitInput.onkeypress = EnterLatencyLimit;
+	LatencyLimitInput.value = LATENCY_LIMIT;	
+
+    TableRefreshRateInput = document.getElementById("TableRefreshRateInput");
+	TableRefreshRateInput.onkeypress = EnterTableRefreshRate;
+	TableRefreshRateInput.value = UPDATE_TABLE_FREQ;
+
+    GraphRefreshRateInput = document.getElementById("GraphRefreshRateInput");
+	TableRefreshRateInput.onkeypress = EnterGraphRefreshRate;
+	GraphRefreshRateInput.value = UPDATE_GRAPH_FREQ;
+
+    HistogramRefreshRateInput = document.getElementById("HistogramRefreshRateInput");
+	TableRefreshRateInput.onkeypress = EnterHistogramRefreshRate;
+	HistogramRefreshRateInput.value = UPDATE_HISTOGRAM_FREQ;
+}
+
+  </script>
+		<style>
+			#chartTest1 {
+				width:640px;
+				height:560px;
+				background-color:#dedeed;
+				border:1px solid #999;
+			}
+			#OuterTable {
+				margin-top: 10pt;
+			}
+			#InnerTable {
+				margin-right: 10pt;
+			}
+			#TableLabel {
+				font-size: 100%;
+				text-align: left;
+			}
+			table {
+				border-collapse: collapse;
+			}
+			td {
+				font-size: 75%;
+				text-align: right;
+				padding-right: 5pt;
+				padding-left: 5pt;
+				width: 60pt;
+			}
+			th {
+				padding-right: 5pt;
+				padding-left: 5pt;
+				background-color:#dedeed;
+			}
+			.SymbolData {
+				text-align: left;
+				width: 50pt;
+			}
+			button {
+				font-size: 100%;
+				font-weight: bold;
+			}
+			.LatencyInput {
+				width: 50;
+			}
+		</style>
+</head>
+
+<body onLoad="InitDashboard()">
+  <button onclick="javascript:StartTimer();">Start</button>
+  <button onclick="javascript:StopTimer();">Stop</button>
+  &nbsp;&nbsp;&nbsp;
+  Latency Max Y <input class="LatencyInput" id="LatencyLimit" onchange="javascript:UpdateLatencyThreshold(LATENCY_THRESHOLD,LATENCY_MAX,parseInt(value))" type="text"></input>
+  (&mu;s)&nbsp;&nbsp;&nbsp;  
+  <button onclick="">Update</button>
+  <input class="RefreshRate" id="TableRefreshRateInput" onchange="javascript:UpdateTableRefreshRate(value)" type="hidden"></input>
+  <input class="RefreshRate" id="GraphRefreshRateInput" onchange="javascript:UpdateGraphRefreshRate(value)" type="hidden"></input>
+  <input class="RefreshRate" id="HistogramRefreshRateInput" onchange="javascript:UpdateHistogramRefreshRate(value)" type="hidden"></input>
+  <table id="OuterTable">
+  	<tr>
+  		<td align="left" valign="top">
+			<table id="InnerTable">
+			<tr><td id="TableLabel">Percentage Change</td></tr>
+  			<tr><td><table border="1" id="PctTable" width="300">
+				<thead></thead>
+  				<tbody id="TableBody"></tbody>
+  			</table></td></tr>
+			<tr><td id="TableLabel">Trend</td></tr>
+  			<tr><td><table border="1" id="TrendTable" width="300">
+				<thead></thead>
+  				<tbody id="TableBody"></tbody>
+  			</table></td></tr>  			
+  			<tr><td><table border="1" id="VWAPTable" width="300">
+				<thead></thead>
+  				<tbody id="TableBody"></tbody>
+  			</table></td></tr>
+  			</table>			  			
+  		</td>
+		<td valign="top">
+			<div id="chartTest1"></div>
+		</td>  		
+   </tr>
+   </table>
+</body>
+</html>

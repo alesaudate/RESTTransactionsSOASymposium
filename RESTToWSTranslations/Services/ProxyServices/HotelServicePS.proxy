@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml-fragment xmlns:ser="http://www.bea.com/wli/sb/services" xmlns:tran="http://www.bea.com/wli/sb/transports" xmlns:env="http://www.bea.com/wli/config/env" xmlns:http="http://www.bea.com/wli/sb/transports/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://www.bea.com/wli/sb/pipeline/config" xmlns:con1="http://www.bea.com/wli/sb/stages/config" xmlns:con2="http://www.bea.com/wli/sb/stages/routing/config" xmlns:con3="http://www.bea.com/wli/sb/stages/transform/config">
+  <ser:coreEntry isProxy="true" isEnabled="true">
+    <ser:binding type="SOAP" isSoap12="false" xsi:type="con:SoapBindingType" xmlns:con="http://www.bea.com/wli/sb/services/bindings/config">
+      <con:wsdl ref="RESTToWSTranslations/Interfaces/Contracts/HotelManagement_1_0"/>
+      <con:binding>
+        <con:name>HotelManagement_1_0SOAP</con:name>
+        <con:namespace>http://services.alesaudate.com/hotel</con:namespace>
+      </con:binding>
+      <con:selector type="SOAP body"/>
+    </ser:binding>
+    <ser:monitoring isEnabled="false">
+      <ser:aggregationInterval>10</ser:aggregationInterval>
+      <ser:pipelineMonitoringLevel>Pipeline</ser:pipelineMonitoringLevel>
+    </ser:monitoring>
+    <ser:reporting>true</ser:reporting>
+    <ser:logging isEnabled="true">
+      <ser:logLevel>debug</ser:logLevel>
+    </ser:logging>
+    <ser:sla-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:sla-alerting>
+    <ser:pipeline-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:pipeline-alerting>
+    <ser:ws-policy>
+      <ser:binding-mode>wsdl-policy-attachments</ser:binding-mode>
+    </ser:ws-policy>
+  </ser:coreEntry>
+  <ser:endpointConfig>
+    <tran:provider-id>http</tran:provider-id>
+    <tran:inbound>true</tran:inbound>
+    <tran:URI>
+      <env:value>/RESTToWSTranslations/Services/ProxyServices/HotelServicePS</env:value>
+    </tran:URI>
+    <tran:inbound-properties/>
+    <tran:all-headers>false</tran:all-headers>
+    <tran:provider-specific>
+      <http:inbound-properties/>
+    </tran:provider-specific>
+  </ser:endpointConfig>
+  <ser:router>
+    <con:pipeline type="error" name="_onErrorHandler-1673513535620592283-5db0fb16.141b27fa7ab.-7976">
+      <con:stage name="stage1">
+        <con:context/>
+        <con:actions>
+          <con3:assign varName="location" xmlns:con2="http://www.bea.com/wli/sb/stages/config" xmlns:con4="http://www.bea.com/wli/sb/stages/logging/config" xmlns:con1="http://www.bea.com/wli/sb/stages/routing/config">
+            <con5:id xmlns:con5="http://www.bea.com/wli/sb/stages/config">_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7795</con5:id>
+            <con3:expr>
+              <con5:xqueryText xmlns:con5="http://www.bea.com/wli/sb/stages/config">$outbound/ctx:transport/ctx:response/tp:headers/http:Location</con5:xqueryText>
+            </con3:expr>
+          </con3:assign>
+          <con3:assign varName="expires" xmlns:con2="http://www.bea.com/wli/sb/stages/config" xmlns:con4="http://www.bea.com/wli/sb/stages/logging/config" xmlns:con1="http://www.bea.com/wli/sb/stages/routing/config">
+            <con5:id xmlns:con5="http://www.bea.com/wli/sb/stages/config">_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7794</con5:id>
+            <con3:expr>
+              <con5:xqueryText xmlns:con5="http://www.bea.com/wli/sb/stages/config">$outbound/ctx:transport/ctx:response/tp:headers/tp:user-header[@name = 'Expires']/@value</con5:xqueryText>
+            </con3:expr>
+          </con3:assign>
+          <con3:ifThenElse xmlns:con2="http://www.bea.com/wli/sb/stages/config" xmlns:con4="http://www.bea.com/wli/sb/stages/logging/config" xmlns:con1="http://www.bea.com/wli/sb/stages/routing/config">
+            <con5:id xmlns:con5="http://www.bea.com/wli/sb/stages/config">_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7789</con5:id>
+            <con3:case>
+              <con3:condition>
+                <con5:xqueryText xmlns:con5="http://www.bea.com/wli/sb/stages/config">$outbound/ctx:transport/ctx:response/http:http-response-code = 307</con5:xqueryText>
+              </con3:condition>
+              <con3:actions>
+                <con3:wsCallout>
+                  <con5:id xmlns:con5="http://www.bea.com/wli/sb/stages/config">_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7786</con5:id>
+                  <con3:service xsi:type="ref:BusinessServiceRef" ref="RESTToWSTranslations/Services/BusinessServices/Hotel/FindBookingRESTServiceBS" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                  <con3:request>
+                    <con3:payload>$request</con3:payload>
+                  </con3:request>
+                  <con3:response>
+                    <con3:payload>response</con3:payload>
+                  </con3:response>
+                  <con3:requestTransform>
+                    <con3:routing-options>
+                      <con5:id xmlns:con5="http://www.bea.com/wli/sb/stages/config">_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7788</con5:id>
+                      <con3:uriExpr>
+                        <con5:xqueryText xmlns:con5="http://www.bea.com/wli/sb/stages/config">data($location)</con5:xqueryText>
+                      </con3:uriExpr>
+                    </con3:routing-options>
+                  </con3:requestTransform>
+                  <con3:responseTransform>
+                    <con3:replace varName="body">
+                      <con5:id xmlns:con5="http://www.bea.com/wli/sb/stages/config">_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7787</con5:id>
+                      <con3:location>
+                        <con5:xpathText xmlns:con5="http://www.bea.com/wli/sb/stages/config">./*</con5:xpathText>
+                      </con3:location>
+                      <con3:expr>
+                        <con5:xqueryTransform xmlns:con5="http://www.bea.com/wli/sb/stages/config">
+                          <con5:resource ref="RESTToWSTranslations/Transformations/Hotel/BookHotelFromRESTToSOAP"/>
+                          <con5:param name="anyType1">
+                            <con5:path>$response</con5:path>
+                          </con5:param>
+                          <con5:param name="string1">
+                            <con5:path>$expires</con5:path>
+                          </con5:param>
+                        </con5:xqueryTransform>
+                      </con3:expr>
+                    </con3:replace>
+                  </con3:responseTransform>
+                </con3:wsCallout>
+                <con5:resume xmlns:con5="http://www.bea.com/wli/sb/stages/config">
+                  <con5:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7785</con5:id>
+                </con5:resume>
+              </con3:actions>
+            </con3:case>
+            <con3:default/>
+          </con3:ifThenElse>
+        </con:actions>
+      </con:stage>
+    </con:pipeline>
+    <con:flow>
+      <con:branch-node type="operation" name="BranchNode1">
+        <con:context/>
+        <con:branch-table>
+          <con:branch name="listHotels">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode1">
+                <con:context>
+                  <con1:varNsDecl namespace="http://services.alesaudate.com/hotel" prefix="hot"/>
+                </con:context>
+                <con:actions>
+                  <con2:route>
+                    <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7a51</con1:id>
+                    <con2:service ref="RESTToWSTranslations/Services/BusinessServices/Hotel/ListHotelsRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con2:outboundTransform>
+                      <con3:replace varName="body">
+                        <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-793e</con1:id>
+                        <con3:location>
+                          <con1:xpathText>*</con1:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con1:xqueryText>''</con1:xqueryText>
+                        </con3:expr>
+                      </con3:replace>
+                    </con2:outboundTransform>
+                    <con2:responseTransform>
+                      <con3:replace varName="body">
+                        <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-78b1</con1:id>
+                        <con3:location>
+                          <con1:xpathText>./*</con1:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con1:xqueryTransform>
+                            <con1:resource ref="RESTToWSTranslations/Transformations/Hotel/ListHotelsFromRESTToSOAP"/>
+                            <con1:param name="anyType1">
+                              <con1:path>$body</con1:path>
+                            </con1:param>
+                          </con1:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con2:responseTransform>
+                  </con2:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="addHotel">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode2">
+                <con:context>
+                  <con1:varNsDecl namespace="http://services.alesaudate.com/hotel" prefix="hot"/>
+                </con:context>
+                <con:actions>
+                  <con2:route>
+                    <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-79e4</con1:id>
+                    <con2:service ref="RESTToWSTranslations/Services/BusinessServices/Hotel/AddHotelRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con2:outboundTransform>
+                      <con3:replace varName="body">
+                        <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7876</con1:id>
+                        <con3:location>
+                          <con1:xpathText>*</con1:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con1:xqueryTransform>
+                            <con1:resource ref="RESTToWSTranslations/Transformations/Hotel/AddHotelFromSOAPToREST"/>
+                            <con1:param name="addHotel1">
+                              <con1:path>$body/*</con1:path>
+                            </con1:param>
+                          </con1:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con2:outboundTransform>
+                    <con2:responseTransform>
+                      <con3:replace varName="body">
+                        <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-783e</con1:id>
+                        <con3:location>
+                          <con1:xpathText>./*</con1:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con1:xqueryTransform>
+                            <con1:resource ref="RESTToWSTranslations/Transformations/Hotel/AddHotelFromRESTToSOAP"/>
+                            <con1:param name="anyType1">
+                              <con1:path>$body</con1:path>
+                            </con1:param>
+                          </con1:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con2:responseTransform>
+                  </con2:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="bookHotel">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode3" error-handler="_onErrorHandler-1673513535620592283-5db0fb16.141b27fa7ab.-7976">
+                <con:context/>
+                <con:actions>
+                  <con2:route>
+                    <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7977</con1:id>
+                    <con2:service ref="RESTToWSTranslations/Services/BusinessServices/Hotel/InsertBookingRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con2:outboundTransform>
+                      <con3:replace varName="body">
+                        <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7806</con1:id>
+                        <con3:location>
+                          <con1:xpathText>*</con1:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con1:xqueryTransform>
+                            <con1:resource ref="RESTToWSTranslations/Transformations/Hotel/BookHotelFromSOAPToREST"/>
+                            <con1:param name="bookHotel1">
+                              <con1:path>$body/*</con1:path>
+                            </con1:param>
+                          </con1:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con2:outboundTransform>
+                    <con2:responseTransform/>
+                  </con2:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="confirmBooking">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode4">
+                <con:context>
+                  <con1:varNsDecl namespace="http://services.alesaudate.com/hotel" prefix="hot"/>
+                </con:context>
+                <con:actions>
+                  <con2:route>
+                    <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7055</con1:id>
+                    <con2:service ref="RESTToWSTranslations/Services/BusinessServices/Hotel/ConfirmBookingRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con2:outboundTransform>
+                      <con5:routing-options xmlns:con2="http://www.bea.com/wli/sb/stages/config" xmlns:con4="http://www.bea.com/wli/sb/stages/logging/config" xmlns:con1="http://www.bea.com/wli/sb/stages/routing/config" xmlns:con5="http://www.bea.com/wli/sb/stages/transform/config">
+                        <con6:id xmlns:con6="http://www.bea.com/wli/sb/stages/config">_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7052</con6:id>
+                        <con5:uriExpr>
+                          <con6:xqueryText xmlns:con6="http://www.bea.com/wli/sb/stages/config">concat('http://localhost:7001/RESTServices/rest/hotel/booking/', data($body/hot:confirmBooking/hot:booking/hot:identifier))</con6:xqueryText>
+                        </con5:uriExpr>
+                      </con5:routing-options>
+                      <con3:replace varName="body">
+                        <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7035</con1:id>
+                        <con3:location>
+                          <con1:xpathText>*</con1:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con1:xqueryTransform>
+                            <con1:resource ref="RESTToWSTranslations/Transformations/Hotel/ConfirmBookingFromSOAPToREST"/>
+                            <con1:param name="confirmBooking1">
+                              <con1:path>$body/*</con1:path>
+                            </con1:param>
+                          </con1:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con2:outboundTransform>
+                    <con2:responseTransform>
+                      <con3:assign varName="body">
+                        <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-6db6</con1:id>
+                        <con3:expr>
+                          <con1:xqueryText>&lt;soap-env:Body>
+	&lt;hot:confirmBookingResponse />
+&lt;/soap-env:Body></con1:xqueryText>
+                        </con3:expr>
+                      </con3:assign>
+                    </con2:responseTransform>
+                  </con2:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="discardBooking">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode5">
+                <con:context>
+                  <con1:varNsDecl namespace="http://services.alesaudate.com/hotel" prefix="hot"/>
+                </con:context>
+                <con:actions>
+                  <con2:route>
+                    <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-6fc8</con1:id>
+                    <con2:service ref="RESTToWSTranslations/Services/BusinessServices/Hotel/DiscardBookingRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con2:outboundTransform>
+                      <con5:routing-options xmlns:con2="http://www.bea.com/wli/sb/stages/config" xmlns:con4="http://www.bea.com/wli/sb/stages/logging/config" xmlns:con1="http://www.bea.com/wli/sb/stages/routing/config" xmlns:con5="http://www.bea.com/wli/sb/stages/transform/config">
+                        <con6:id xmlns:con6="http://www.bea.com/wli/sb/stages/config">_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-6f8f</con6:id>
+                        <con5:uriExpr>
+                          <con6:xqueryText xmlns:con6="http://www.bea.com/wli/sb/stages/config">concat('http://localhost:7001/RESTServices/rest/hotel/booking/', data($body/hot:discardBooking/hot:booking/hot:identifier))</con6:xqueryText>
+                        </con5:uriExpr>
+                      </con5:routing-options>
+                    </con2:outboundTransform>
+                    <con2:responseTransform>
+                      <con3:assign varName="body">
+                        <con1:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-6db3</con1:id>
+                        <con3:expr>
+                          <con1:xqueryText>&lt;soap-env:Body>
+	&lt;hot:discardBookingResponse />
+&lt;/soap-env:Body></con1:xqueryText>
+                        </con3:expr>
+                      </con3:assign>
+                    </con2:responseTransform>
+                  </con2:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:default-branch>
+            <con:flow/>
+          </con:default-branch>
+        </con:branch-table>
+      </con:branch-node>
+    </con:flow>
+  </ser:router>
+</xml-fragment>

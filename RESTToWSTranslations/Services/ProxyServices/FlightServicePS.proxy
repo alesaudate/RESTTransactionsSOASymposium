@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml-fragment xmlns:ser="http://www.bea.com/wli/sb/services" xmlns:tran="http://www.bea.com/wli/sb/transports" xmlns:env="http://www.bea.com/wli/config/env" xmlns:http="http://www.bea.com/wli/sb/transports/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://www.bea.com/wli/sb/pipeline/config" xmlns:con1="http://www.bea.com/wli/sb/stages/routing/config" xmlns:con2="http://www.bea.com/wli/sb/stages/config" xmlns:con3="http://www.bea.com/wli/sb/stages/transform/config" xmlns:con4="http://www.bea.com/wli/sb/stages/logging/config">
+  <ser:coreEntry isProxy="true" isEnabled="true">
+    <ser:binding type="SOAP" isSoap12="false" xsi:type="con:SoapBindingType" xmlns:con="http://www.bea.com/wli/sb/services/bindings/config">
+      <con:wsdl ref="RESTToWSTranslations/Interfaces/Contracts/FlightManagement_1_0"/>
+      <con:binding>
+        <con:name>FlightManagement_1_0SOAP</con:name>
+        <con:namespace>http://services.alesaudate.com/flight</con:namespace>
+      </con:binding>
+      <con:selector type="SOAP body"/>
+    </ser:binding>
+    <ser:monitoring isEnabled="false">
+      <ser:aggregationInterval>10</ser:aggregationInterval>
+      <ser:pipelineMonitoringLevel>Pipeline</ser:pipelineMonitoringLevel>
+    </ser:monitoring>
+    <ser:reporting>true</ser:reporting>
+    <ser:logging isEnabled="true">
+      <ser:logLevel>debug</ser:logLevel>
+    </ser:logging>
+    <ser:sla-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:sla-alerting>
+    <ser:pipeline-alerting isEnabled="true">
+      <ser:alertLevel>normal</ser:alertLevel>
+    </ser:pipeline-alerting>
+    <ser:ws-policy>
+      <ser:binding-mode>wsdl-policy-attachments</ser:binding-mode>
+    </ser:ws-policy>
+  </ser:coreEntry>
+  <ser:endpointConfig>
+    <tran:provider-id>http</tran:provider-id>
+    <tran:inbound>true</tran:inbound>
+    <tran:URI>
+      <env:value>/RESTToWSTranslations/Services/ProxyServices/FlightServicePS</env:value>
+    </tran:URI>
+    <tran:inbound-properties/>
+    <tran:all-headers>false</tran:all-headers>
+    <tran:provider-specific>
+      <http:inbound-properties/>
+    </tran:provider-specific>
+  </ser:endpointConfig>
+  <ser:router>
+    <con:pipeline type="error" name="_onErrorHandler-1673513535620592283-5db0fb16.141b27fa7ab.-7eb9">
+      <con:stage name="stage1">
+        <con:context>
+          <con2:varNsDecl namespace="http://services.alesaudate.com/flight" prefix="flig"/>
+        </con:context>
+        <con:actions>
+          <con4:log>
+            <con2:id>_ActionId-59758194556969752-46986a42.141d4181396.-7fd7</con2:id>
+            <con4:logLevel>warning</con4:logLevel>
+            <con4:expr>
+              <con2:xqueryText>$body</con2:xqueryText>
+            </con4:expr>
+          </con4:log>
+          <con4:log>
+            <con2:id>_ActionId-59758194556969752-46986a42.141d4181396.-7fd5</con2:id>
+            <con4:logLevel>warning</con4:logLevel>
+            <con4:expr>
+              <con2:xqueryText>$outbound</con2:xqueryText>
+            </con4:expr>
+          </con4:log>
+          <con3:assign varName="location">
+            <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7b46</con2:id>
+            <con3:expr>
+              <con2:xqueryText>$outbound/ctx:transport/ctx:response/tp:headers/http:Location</con2:xqueryText>
+            </con3:expr>
+          </con3:assign>
+          <con3:assign varName="expires">
+            <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7b28</con2:id>
+            <con3:expr>
+              <con2:xqueryText>$outbound/ctx:transport/ctx:response/tp:headers/tp:user-header[@name = 'Expires']/@value</con2:xqueryText>
+            </con3:expr>
+          </con3:assign>
+          <con3:ifThenElse>
+            <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7e4b</con2:id>
+            <con3:case>
+              <con3:condition>
+                <con2:xqueryText>$outbound/ctx:transport/ctx:response/http:http-response-code = 307</con2:xqueryText>
+              </con3:condition>
+              <con3:actions>
+                <con3:wsCallout>
+                  <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7dd9</con2:id>
+                  <con3:service xsi:type="ref:BusinessServiceRef" ref="RESTToWSTranslations/Services/BusinessServices/Flight/FindBookingRESTServiceBS" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                  <con3:request>
+                    <con3:payload>$request</con3:payload>
+                  </con3:request>
+                  <con3:response>
+                    <con3:payload>response</con3:payload>
+                  </con3:response>
+                  <con3:requestTransform>
+                    <con3:routing-options>
+                      <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7beb</con2:id>
+                      <con3:uriExpr>
+                        <con2:xqueryText>data($location)</con2:xqueryText>
+                      </con3:uriExpr>
+                    </con3:routing-options>
+                  </con3:requestTransform>
+                  <con3:responseTransform>
+                    <con3:replace varName="body">
+                      <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7da1</con2:id>
+                      <con3:location>
+                        <con2:xpathText>./*</con2:xpathText>
+                      </con3:location>
+                      <con3:expr>
+                        <con2:xqueryTransform>
+                          <con2:resource ref="RESTToWSTranslations/Transformations/Flight/BookFlightFromRESTToSOAP"/>
+                          <con2:param name="anyType1">
+                            <con2:path>$response</con2:path>
+                          </con2:param>
+                          <con2:param name="dateTime1">
+                            <con2:path>$expires</con2:path>
+                          </con2:param>
+                        </con2:xqueryTransform>
+                      </con3:expr>
+                    </con3:replace>
+                  </con3:responseTransform>
+                </con3:wsCallout>
+                <con2:resume>
+                  <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7d69</con2:id>
+                </con2:resume>
+              </con3:actions>
+            </con3:case>
+            <con3:default/>
+          </con3:ifThenElse>
+        </con:actions>
+      </con:stage>
+    </con:pipeline>
+    <con:flow>
+      <con:branch-node type="operation" name="BranchNode1">
+        <con:context/>
+        <con:branch-table>
+          <con:branch name="listFlights">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode1">
+                <con:context>
+                  <con2:varNsDecl namespace="http://services.alesaudate.com/flight" prefix="flig"/>
+                </con:context>
+                <con:actions>
+                  <con1:route>
+                    <con2:id>_ActionId-195367829124136364--6894733a.141ade49c96.-7f1b</con2:id>
+                    <con1:service ref="RESTToWSTranslations/Services/BusinessServices/Flight/ListFlightsRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con1:outboundTransform>
+                      <con3:replace varName="body">
+                        <con2:id>_ActionId-195367829124136364--6894733a.141ade49c96.-7db4</con2:id>
+                        <con3:location>
+                          <con2:xpathText>*</con2:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con2:xqueryText>''</con2:xqueryText>
+                        </con3:expr>
+                      </con3:replace>
+                    </con1:outboundTransform>
+                    <con1:responseTransform>
+                      <con3:replace varName="body">
+                        <con2:id>_ActionId-195367829124136364--6894733a.141ade49c96.-7cf0</con2:id>
+                        <con3:location>
+                          <con2:xpathText>./*</con2:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con2:xqueryTransform>
+                            <con2:resource ref="RESTToWSTranslations/Transformations/Flight/ListFlightsFromRESTToSOAP"/>
+                            <con2:param name="anyType1">
+                              <con2:path>$body</con2:path>
+                            </con2:param>
+                          </con2:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con1:responseTransform>
+                  </con1:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="addFlight">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode2">
+                <con:context>
+                  <con2:varNsDecl namespace="http://services.alesaudate.com/flight" prefix="flig"/>
+                </con:context>
+                <con:actions>
+                  <con1:route>
+                    <con2:id>_ActionId-195367829124136364--6894733a.141ade49c96.-7c4a</con2:id>
+                    <con1:service ref="RESTToWSTranslations/Services/BusinessServices/Flight/AddFlightRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con1:outboundTransform>
+                      <con3:replace varName="body">
+                        <con2:id>_ActionId-195367829124136364--6894733a.141ade49c96.-7bf6</con2:id>
+                        <con3:location>
+                          <con2:xpathText>*</con2:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con2:xqueryTransform>
+                            <con2:resource ref="RESTToWSTranslations/Transformations/Flight/AddFlightsFromSOAPToREST"/>
+                            <con2:param name="addFlight1">
+                              <con2:path>$body/*</con2:path>
+                            </con2:param>
+                          </con2:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con1:outboundTransform>
+                    <con1:responseTransform>
+                      <con3:replace varName="body">
+                        <con2:id>_ActionId-195367829124136364--6894733a.141ade49c96.-7bbe</con2:id>
+                        <con3:location>
+                          <con2:xpathText>./*</con2:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con2:xqueryTransform>
+                            <con2:resource ref="RESTToWSTranslations/Transformations/Flight/AddFlightsFromRESTToSOAP"/>
+                            <con2:param name="anyType1">
+                              <con2:path>$body</con2:path>
+                            </con2:param>
+                          </con2:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con1:responseTransform>
+                  </con1:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="bookFlight">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode3" error-handler="_onErrorHandler-1673513535620592283-5db0fb16.141b27fa7ab.-7eb9">
+                <con:context>
+                  <con2:varNsDecl namespace="http://services.alesaudate.com/flight" prefix="flig"/>
+                </con:context>
+                <con:actions>
+                  <con1:route>
+                    <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7f94</con2:id>
+                    <con1:service ref="RESTToWSTranslations/Services/BusinessServices/Flight/InsertBookingRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con1:outboundTransform>
+                      <con3:replace varName="body">
+                        <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7f58</con2:id>
+                        <con3:location>
+                          <con2:xpathText>*</con2:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con2:xqueryTransform>
+                            <con2:resource ref="RESTToWSTranslations/Transformations/Flight/BookFlightFromSOAPToREST"/>
+                            <con2:param name="bookFlight1">
+                              <con2:path>$body/*</con2:path>
+                            </con2:param>
+                          </con2:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con1:outboundTransform>
+                    <con1:responseTransform/>
+                  </con1:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="confirmBooking">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode4">
+                <con:context>
+                  <con2:varNsDecl namespace="http://services.alesaudate.com/flight" prefix="flig"/>
+                </con:context>
+                <con:actions>
+                  <con1:route>
+                    <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7154</con2:id>
+                    <con1:service ref="RESTToWSTranslations/Services/BusinessServices/Flight/ConfirmBookingRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con1:outboundTransform>
+                      <con5:routing-options xmlns:con5="http://www.bea.com/wli/sb/stages/transform/config">
+                        <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7150</con2:id>
+                        <con5:uriExpr>
+                          <con2:xqueryText>concat('http://localhost:7001/RESTServices/rest/flight/booking/', data($body/flig:confirmBooking/flig:booking/flig:identifier))</con2:xqueryText>
+                        </con5:uriExpr>
+                      </con5:routing-options>
+                      <con3:replace varName="body">
+                        <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-7133</con2:id>
+                        <con3:location>
+                          <con2:xpathText>*</con2:xpathText>
+                        </con3:location>
+                        <con3:expr>
+                          <con2:xqueryTransform>
+                            <con2:resource ref="RESTToWSTranslations/Transformations/Flight/ConfirmBookingFromSOAPToREST"/>
+                            <con2:param name="confirmBooking1">
+                              <con2:path>$body/*</con2:path>
+                            </con2:param>
+                          </con2:xqueryTransform>
+                        </con3:expr>
+                      </con3:replace>
+                    </con1:outboundTransform>
+                    <con1:responseTransform>
+                      <con3:assign varName="body">
+                        <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-6d96</con2:id>
+                        <con3:expr>
+                          <con2:xqueryText>&lt;soap-env:Body>
+	&lt;flig:confirmBookingResponse />
+&lt;/soap-env:Body></con2:xqueryText>
+                        </con3:expr>
+                      </con3:assign>
+                    </con1:responseTransform>
+                  </con1:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:branch name="discardBooking">
+            <con:operator>equals</con:operator>
+            <con:value/>
+            <con:flow>
+              <con:route-node name="RouteNode5">
+                <con:context>
+                  <con2:varNsDecl namespace="http://services.alesaudate.com/flight" prefix="flig"/>
+                </con:context>
+                <con:actions>
+                  <con1:route>
+                    <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-70c6</con2:id>
+                    <con1:service ref="RESTToWSTranslations/Services/BusinessServices/Flight/DiscardBookingRESTServiceBS" xsi:type="ref:BusinessServiceRef" xmlns:ref="http://www.bea.com/wli/sb/reference"/>
+                    <con1:outboundTransform>
+                      <con5:routing-options xmlns:con5="http://www.bea.com/wli/sb/stages/transform/config">
+                        <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-70c3</con2:id>
+                        <con5:uriExpr>
+                          <con2:xqueryText>concat('http://localhost:7001/RESTServices/rest/flight/booking/', data($body/flig:discardBooking/flig:booking/flig:identifier))</con2:xqueryText>
+                        </con5:uriExpr>
+                      </con5:routing-options>
+                    </con1:outboundTransform>
+                    <con1:responseTransform>
+                      <con3:assign varName="body">
+                        <con2:id>_ActionId-1673513535620592283-5db0fb16.141b27fa7ab.-6d79</con2:id>
+                        <con3:expr>
+                          <con2:xqueryText>&lt;soap-env:Body>
+	&lt;flig:discardBookingResponse />
+&lt;/soap-env:Body></con2:xqueryText>
+                        </con3:expr>
+                      </con3:assign>
+                    </con1:responseTransform>
+                  </con1:route>
+                </con:actions>
+              </con:route-node>
+            </con:flow>
+          </con:branch>
+          <con:default-branch>
+            <con:flow/>
+          </con:default-branch>
+        </con:branch-table>
+      </con:branch-node>
+    </con:flow>
+  </ser:router>
+</xml-fragment>

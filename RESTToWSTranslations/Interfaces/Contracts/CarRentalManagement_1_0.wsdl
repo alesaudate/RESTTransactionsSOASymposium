@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:tns="http://services.alesaudate.com/car" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="CarRentalManagement_1_0"
+	targetNamespace="http://services.alesaudate.com/car">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://services.alesaudate.com/car">
+		
+			<xsd:include schemaLocation="../Schemas/CarRental_1_0.xsd" />
+			
+			<xsd:element name="listCars">
+				<xsd:complexType />
+			</xsd:element>
+			<xsd:element name="listCarsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="tns:cars" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:element name="addCar">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="tns:car" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:element name="addCarResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="tns:car" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:element name="rentCar">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="tns:carRental" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:element name="rentCarResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="tns:carRental" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:element name="confirmRental">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="tns:carRental" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:element name="confirmRentalResponse">
+				<xsd:complexType />
+			</xsd:element>
+			
+			<xsd:element name="discardRental">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="tns:carRental" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:element name="discardRentalResponse">
+				<xsd:complexType />
+			</xsd:element>
+			
+			
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="listCarsRequest">
+		<wsdl:part element="tns:listCars" name="body" />
+	</wsdl:message>
+	<wsdl:message name="listCarsResponse">
+		<wsdl:part element="tns:listCarsResponse" name="body" />
+	</wsdl:message>
+	
+	<wsdl:message name="addCarRequest">
+		<wsdl:part element="tns:addCar" name="body" />
+	</wsdl:message>
+	<wsdl:message name="addCarResponse">
+		<wsdl:part element="tns:addCarResponse" name="body" />
+	</wsdl:message>
+	
+	<wsdl:message name="rentCarRequest">
+		<wsdl:part element="tns:rentCar" name="body" />
+	</wsdl:message>
+	
+	<wsdl:message name="rentCarResponse">
+		<wsdl:part element="tns:rentCarResponse" name="body" />
+	</wsdl:message>
+	
+	<wsdl:message name="confirmRentalRequest">
+		<wsdl:part element="tns:confirmRental" name="body" />
+	</wsdl:message>
+	
+	<wsdl:message name="confirmRentalResponse">
+		<wsdl:part element="tns:confirmRentalResponse" name="body" />
+	</wsdl:message>
+	
+	<wsdl:message name="discardRentalRequest">
+		<wsdl:part element="tns:discardRental" name="body" />
+	</wsdl:message>
+	
+	<wsdl:message name="discardRentalResponse">
+		<wsdl:part element="tns:discardRentalResponse" name="body" />
+	</wsdl:message>
+	
+	<wsdl:portType name="CarRentalManagement_1_0">
+		<wsdl:operation name="listCars">
+			<wsdl:input message="tns:listCarsRequest" />
+			<wsdl:output message="tns:listCarsResponse" />
+		</wsdl:operation>
+		
+		<wsdl:operation name="addCar">
+			<wsdl:input message="tns:addCarRequest" />
+			<wsdl:output message="tns:addCarResponse" />
+		</wsdl:operation>
+		
+		<wsdl:operation name="rentCar">
+			<wsdl:input message="tns:rentCarRequest" />
+			<wsdl:output message="tns:rentCarResponse" />
+		</wsdl:operation>
+		
+		<wsdl:operation name="confirmRental">
+			<wsdl:input message="tns:confirmRentalRequest" />
+			<wsdl:output message="tns:confirmRentalResponse" />
+		</wsdl:operation>
+		
+		<wsdl:operation name="discardRental">
+			<wsdl:input message="tns:discardRentalRequest" />
+			<wsdl:output message="tns:discardRentalResponse" />
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="CarRentalManagement_1_0SOAP" type="tns:CarRentalManagement_1_0">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="listCars">
+			<soap:operation
+				soapAction="" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		
+		<wsdl:operation name="addCar">
+			<soap:operation
+				soapAction="" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		
+		<wsdl:operation name="rentCar">
+			<soap:operation
+				soapAction="" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		
+		<wsdl:operation name="confirmRental">
+			<soap:operation
+				soapAction="" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		
+		<wsdl:operation name="discardRental">
+			<soap:operation
+				soapAction="" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="CarRentalManagement_1_0">
+		<wsdl:port binding="tns:CarRentalManagement_1_0SOAP" name="CarRentalManagement_1_0SOAP">
+			<soap:address location="http://www.example.org/" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
